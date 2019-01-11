@@ -1,0 +1,19 @@
+Grading at 10/05/2018:02:22:22.299419
+For commit ID 76ff786ac751a45b14e47512d8e75281010b2a16
+********************test case 1********************
+Exit status of your code: 0
+[32mValgrind was clean[0m
+[32mCorrect: your output matched the expected output.[0m
+[32mpassed test case 1[0m
+********************test case 2********************
+Exit status of your code: 0
+[32mValgrind was clean[0m
+[32mCorrect: your output matched the expected output.[0m
+[32mpassed test case 2[0m
+********************test case 3********************
+Exit status of your code: 0
+[32mValgrind was clean[0m
+[32mCorrect: your output matched the expected output.[0m
+[32mpassed test case 3[0m
+[32msuccessfully passed all 3 test cases[0m
+Overall Grade: A
