@@ -1,0 +1,21 @@
+Grading at 09/24/2018:19:03:00.770710
+For commit ID 6ed1b1369970dc0e174b3e30191107da30dd9a12
+running passed-in stu_imp ./breaker
+[32mSuccessfully compiled .[0m
+********************test case 1********************
+Exit status of your code: 0
+[32mValgrind was clean[0m
+[32mCorrect: your output matched the expected output.[0m
+[32mpassed test case 1[0m
+********************test case 2********************
+Exit status of your code: 0
+[32mValgrind was clean[0m
+[32mCorrect: your output matched the expected output.[0m
+[32mpassed test case 2[0m
+********************test case 3********************
+Exit status of your code: 0
+[32mValgrind was clean[0m
+[32mCorrect: your output matched the expected output.[0m
+[32mpassed test case 3[0m
+[32msuccessfully passed all 3 test cases[0m
+Overall Grade: A
