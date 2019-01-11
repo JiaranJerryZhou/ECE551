@@ -1,0 +1,307 @@
+Clarification:
+Input specification: When there is a escape character '\', I will escape whatever character after it (not only white space). If there is a single '\' at the end of input, it will print the error that there is no character to escape.
+$ specification: If there is a single '$' after '$', it will be treated as a character, but the next '$' sign will be treated as evaluation mark; If there is a '$' sign at the end of the input, it will be treated as a character.
+Set command: My shell will parse the input first. Then if the first command is "set", it will parse the input again to put the remaining part as argv[0]. It will also escape when there is a '\', but it will not skip the space. Then it will evaluate each argument if there is '$' sign. So my shell can set one variable with aonther variable's value.
+Export command: If I export an non-exist variable, it will not export and print some error message.
+At the beginning of running, my shell will put all the envioment variables in its variable map, and set the value of PATH to ECE551PATH.
+I designed the parse and evaluate pattern according to the real shell.
+Quote: man pages of linux for command getenv, setenv, getcwd, access, dirent,  etc.
+C++ reference webpage for map, pair, vector, string, etc.
+
+Test cases:
+(1)
+valgrind ./myShell
+Then: exit
+My shell will exit normally with valgrind clean. This is to show my shell can exit normally.
+(2)
+valgrind ./myShell 123
+It will print: Usage: ./myShell
+This is to show that my shell takes only one argument.
+
+The following testcases are all runned in valgrind ./myShell.
+(3)
+valgrind ./myShell
+Then: exit
+My inner shell will exit with valgrind clean. This is to show that my shell can run normally in my shell. And it will not exit the outer shell.
+(4)
+./myShell
+Then press: Ctrl+D
+It will print:
+Program exited with status 0
+This is to show that myShell can exit normally when EOF.
+(5)
+valgrind ./myShell 123
+It will print: Usage: ./myShell
+Program exited with status 1
+This is to show that my shell takes only one argument. And if the inner my shell cannot be open, the parent shell will catch its exit status is 1.
+(6)
+./testcases/test1
+It will print: Program exited will status 1
+My test1 is just exit(EXIT_FAILURE). This is to show that my shell can catch the exit status of child process.
+(7)
+./testcases/test2
+It will print: Program was killed by signal 6
+My test2 is a broken code with invalid read. This is to show that my shell can catch the signal status of child process.
+(8)
+./myShell.cpp
+It will print: Permission denied.
+It is to show that my shell will not only judge if the command is found. It will also check if the command can be executed.
+(9)
+./testcases/test0
+It will print: Command ./testcases/test0 not found.
+It is to show that my shell will judge if the command exists.
+(10)
+./testcases/test3 asd     qwe  \ \ \    \ zxc
+It will print:
+./testcases/test3
+asd
+qwe
+   
+ zxc
+There are total 5 arguments
+Program exited with status 0
+My test3 is to print all arguments after parsed. This is to show my parse function is correct.
+(11)
+./testcases/test3 a\ b c\ \ d
+It will print:
+./testcases/test3
+a b
+c  d
+There are total 3 arguments
+Program exited with status 0
+This is the testcases in commandShell.txt. My shell has the right behavior.
+(12)
+./testcases/test3 a\  b c \ d
+It will print:
+./testcases/test3
+a 
+b
+c
+ d
+There are total 5 arguments
+Program exited with status 0
+This is also the test cases in commandShell.txt. My shell has the expected bahavior.
+(13)
+./testcases/test3 \
+It will print:
+no character to escape
+./testcases/test3  
+There are total 1 arguments
+Program exited with status 0
+It is to show that my parse will handle the situation if the last character of input is escape sign. It will print the error that there is no character to escape.
+(14)
+
+(press enter or a lot of white space)
+It will doing nothing but print the prompt again.
+It is to show that if there is only spaces in the input, there will not be any arguments after parse.
+(15)
+        exit
+My shell will exit normally.
+It is also to show my parse result is correct and all spaces are omitted.
+(16)
+ls
+env
+echo $PATH
+My shell will do the ls, env, echo commands the same as the system shell, and print: Program exited with status 0.
+If the command does not contain '/', it will search ECE551PATH for the command file. And the result shows that my shell can do this.
+(17)
+l\s
+en\v
+My shell will still do the ls and env commands.
+It is to show that my shell can both parse the input correctly and execute the commands correctly after the input is parsed.
+(18)
+echo $ECE551PATH
+It will print:
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+Program exited with status 0
+This is to prove that my shell has correctly set the ECE551PATH.
+(19)
+./testcases/test3         qqq       zxc         asd
+It will print:
+./testcases/test3 qqq zxc asd 
+There are total 4 arguments
+Program exited with status 0
+It is also used to show that my parse for arguments is correct as testcase(10).
+(20)
+/bin/ls
+My shell will also operate the ls command. This is to show that my shell can also search the path correctly if I enter the full path.
+
+We are going to test the commands in step3. The first command to test is cd.
+(21)
+cd ..
+env
+It will go to the upper level directory. The prompt will show myShell:/home/jz270/ece551$ . We then use the env to see the environment variables. We can see that PWD=/home/jz270/ece551 and OLDPWD=/home/jz270/ece551/mp_miniproject. So our cd .. command is correct.
+(22)
+cd $HOME
+env
+It will go to the directory of /home/jz270. And after we run env, we can see that the PWD and OLDPWD are also set correctly. So the result is correct, and it shows that our cd command can work together with '$' sign.
+(23)
+cd
+env
+It will also go to the directory of /home/jz270, which is the same as $HOME. It shows that when there is only 1 arguments, our cd command will also go to the HOME directory, which is the same as the cd command in the system shell.
+(24)
+cd /testcases ..
+It will print: "Usage: cd directory". My shell will tell the user the right format to use cd command. So my shell works correctly when there are too many arguments for cd.
+(25)
+cd .
+env
+It will not change the directory or the PWD and OLDPWD. Since . is the current directory, my shell has the right behavior.
+(26)
+cd home/drew
+It will print "cannot enter directory". Since home/drew is an non-exist directory, my cd command has the right behavior.
+(27)
+cd /
+cd ..
+env
+My shell will print the prompt: myShell:/$. Then it will print the same prompt again. Since the cd / command will enter the root directory, so the cd .. command will not enter the upper directory. And the PWD and OLDPWD are both /. My shell has the right behavior.
+
+The following testcases are for '$' evaluations.
+(28)
+$PATH
+It will print: Command /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games not found
+Since $PATH will evaluate the PATH to its value, and be can see from the above it has correct value. Since it is not a command, it will say it is not found. My shell has the right behavior.
+(29)
+$PATH$
+It will print: Command /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games$ not found
+Since $PATH will evaluate PATH to its value, and a single '$' is just a character in my specification, the result is correct.
+(30)
+$$PATH
+It will print: Command $PATH not found.
+Since in my specification, a single '$' after '$' is only a character not a evaluate sign, and since it is an unvalid variable name, it will just be itself. So my result is correct.
+(31)
+$$$PATH
+It will print: Command $/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games not found
+Since the second '$' is just a character and its a invalid variable name, and the third '$' is the evaluate sign and it will evaluate PATH to its value, so the result will be $ concatenate with PATH's value. My shell has the right result.
+(32)
+$PATH$PATH$
+It will print:
+Command /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games$ not found
+Since it will evaluate PATH to its value twice and concatenate them together, and the third '$' is just a character, the result is correct.
+(33)
+$asd
+My shell will do nothing but print the prompt again. Since asd is a valid variable name, but it does not have a value yet, so it will just be "". So the command is the same as pressing Enter. So the result is correct.
+(34)
+$asd$PATH$zxc$$
+It will print: Command /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games$ not found
+This is the testcase combines the previous several testcases. It will evalute asd to its value. Since it does not have the value yet, it will be "". Then It will evaluate PATH to its value. It will then evaluate zxc to its value, which is also "". Then it will evalute '$' to its value. Since it is just a character and an invalid variable name, it will just be itself. After concatenating those 4 parts together, we get the correct result.
+
+Then we will test the set command.
+(35)
+set aaa 123
+echo $123
+It will print: 123
+Program exited with status 0
+This is the simpliest testcase for set. It will set aaa to 123, and when we echo $aaa, it will evaluate aaa to its value and print that value. My shell is correct.
+(36)
+set aaa\a \ b
+echo $aaaa
+It will print:  b
+Program exited with status 0
+This testcase is used to show that my set command works well together with the parse function. It will parse the input into three parts, and set aaaa's value to  b. My shell works correctly.
+(37)
+set x ex
+set y it
+$x$y
+The program will exit. Since x is ex and y is it. So we evaluate their value and comcatenate their value together to get exit. So my shell can set variables and evaluate them correctly.
+(38)
+set aa\ aa    \b
+echo $aa aa
+ aa
+Program exited with status 0
+This will parse the input into three parts: set, aa aa and b. Since aa aa is not a valid variable name. It will not set its value. Then it will evaluate aa to its value, which do not exist. And append 'space'aa to it. So the result will be 'space'aa. My shell behaves correctly.
+If we run: set aa 123, then: $aa aa again, then we will get 123 aa.
+(39)
+set bbb      a              b
+echo $bbb
+It will print:
+a              b
+Program exited with status 0
+This testcase is to show that the parse pattern for set command is different from the parse for input. It will put the remaining part after argv[1] into argv[2], even if there are spaces.
+(40)
+set a set a 123
+$a
+It will print: Command set a 123 not found
+This will set a to "set a 123", but this command is only one argument. So it will say it is not found, which is correct.
+(41)
+set aaa $bbb
+set bbb 123
+$aaa$bbb
+It will print: Command 123 not found.
+This is to show that my set command can also set one variable's value to another variable. Since bbb do not have value at first, aaa will not have value. Then we set bbb to 123, and $aaa$bbb. We get 123, which is correct.
+If we swap the first two lines, we can get the following output: Command 123123 not found. It proves that my shell can set one's value to another.
+(42)
+set abc 123
+set abc 456
+echo $abc
+It will print:
+456
+Program exited with status 0
+This is to test if our set command can change an exist variable. Since echo will print the second value, we have set and changed the value of abc correctly.
+
+Then I tested the export command.
+(43)
+set a 123
+echo $a
+env
+export a
+env
+This is to test if we set one variable but don't export it, it will not appears in environment variables. So when we run the first env, a will not appears in the list. After we export it, it will appear in the environment variables. So after we run the second env, we are able to see a=123, which means our export command is correct.
+(44)
+After we have set and export a in the previous testcase, we run:
+./myShell
+env
+We still can see a=123 by env. So it has set the environment variable and export it for other programs to use, which meet the project's requirement.
+(45)
+set PATH 123123
+export PATH
+env
+We can see that from the printed environment variables, PATH is changed to 123123. So my shell can set an exist variable and export it to environment variables to change its value, which is correct.
+(46)
+set ECE551PATH 123123
+export ECE551PATH
+env
+In the previous test, we can still run commands such as ls, env, etc. This is because we use ECE551PATH to search the commands. If we set ECE551PATH's value, then we export it, we will not longer run those commands. This shows two things: we set and export variables correctly, and we search the commands from ECE551PATH correctly.
+(47)
+export ECE590PATH
+It will print: No variable name: ECE590PATH
+In this testcase, we try to export some variable that does not exist. It will tell us there is no such variable, which means our export command is correct.
+(48)
+export aaa aaa aaa
+It will print: Usage: export $var
+Our export command can only takes two arguments. So my shell will tell the user the right way to run export.
+
+Then I will test the inc command.
+(49)
+set a 1
+inc a
+echo $a
+It will print: 2
+Program exited with status 0
+This is the normal case of inc. We set a variable and increase it by 1. Our echo result shows that the inc command is correct.
+(50)
+inc n
+echo $n
+It will print: 1
+Program exited with status 0
+This is to show when we try to increase some variable that does not exist, it will set its value to 1. Our result is correct.
+(51)
+set b   v      n
+inc b
+echo $b
+It will print: 1
+Program exited with status 0
+This is to show when we try to increase some variable whose value is not number, it will set its value to 1. Our result is correct.
+(52)
+set c -3
+inc c
+echo $c
+It will print: -2
+Program exited with status 0
+This is to show that my shell can increase a variable with negative value correctly.
+(53)
+set d -1
+inc d
+echo $d
+It will print: 0
+Program exited with status 0
+This is a corner case of previous testcase. If the value changed from negative number to 0, my shell can also handle it correctly.

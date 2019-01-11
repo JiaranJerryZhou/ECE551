@@ -1,0 +1,3 @@
+Grade: 98.5
+Comments:
+fail test case: "inc a variable of value 123"; set ECE551PATH need export to work; Abstractions are good. But still can be improved, for example using separate functions for skip white space and escape signs.
