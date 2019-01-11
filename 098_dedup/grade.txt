@@ -1,0 +1,22 @@
+Grading at 11/09/2018:02:28:30.392980
+For commit ID 186f5bd477dab3f78394d9bb8839b038f6b6a50f
+Running make
+g++ -std=gnu++11 -Werror -Wall -pedantic -o dedup dedup.cpp
+Found executable dedup
+-----------------------------------------------
+testcase 1 : ./dedup /var/dedup/d000
+  - Valgrind was clean (no errors, no memory leaks)
+Checking output:
+Testcase passed 
+-----------------------------------------------
+testcase 2 : ./dedup /var/dedup/d001
+  - Valgrind was clean (no errors, no memory leaks)
+Checking output:
+Testcase passed 
+-----------------------------------------------
+testcase 3 : ./dedup /var/dedup/*
+  - Valgrind was clean (no errors, no memory leaks)
+Checking output:
+Testcase passed 
+
+Overall Grade: A
